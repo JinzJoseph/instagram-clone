@@ -1,13 +1,16 @@
-import React from 'react'
-import Post from './Post'
-
+import React from "react";
+import Post from "./Post";
+import { useSelector } from "react-redux";
 const Posts = () => {
+  const { post } = useSelector((state) => state?.posts);
+ 
   return (
     <div>
-     <Post/>
-     <Post/>
+      {post?.map((item, index) => {
+        return <Post key={index} item={item} />;
+      })}
     </div>
-  )
-}
+  );
+};
 
-export default Posts
+export default Posts;

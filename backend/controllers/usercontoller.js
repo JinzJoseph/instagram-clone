@@ -67,7 +67,7 @@ export const login = async (req, res) => {
     //populate user post
     const populatedPost = [];
     for (const postId of user.posts) {
-      const post = await Post.findById({ postId });
+      const post = await Post.findById( postId );
       if (post.author === user._id) {
         populatedPost.push(user._id)
         return populatedPost

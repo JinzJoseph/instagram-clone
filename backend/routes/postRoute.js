@@ -4,7 +4,7 @@ import { addcomment, addNewPost, allPost, bookmarked, deletePost, dislikePost, g
 import upload from "../middlewares/multer.js"
 const router=express.Router();
 router.post("/addnewpost",isAuthenticated,upload.single("image"),addNewPost)
-router.get("getallpost",isAuthenticated,allPost);
+router.get("/getallpost",isAuthenticated,allPost);
 router.get("/getUserPost",isAuthenticated,getUserPost);
 router.put("/like/:id",isAuthenticated,likePost);
 router.put("/dislike/:id",isAuthenticated,dislikePost);

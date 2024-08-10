@@ -1,6 +1,7 @@
 import Post from "../models/postModel.js";
 import Comment from "../models/commentModel.js";
 import User from "../models/userModel.js";
+import getDataUri from "../middlewares/getDataurl.js"
 import cloudinary from "../middlewares/cloudinary.js";
 export const addNewPost = async (req, res) => {
   try {
@@ -13,32 +14,26 @@ export const addNewPost = async (req, res) => {
         success: false,
       });
     }
-    // sharp the given image into common formats
-    // const sharpedImage = await sharp(image.buffer)
-    //   .resize({ width: 800, height: 800, fit: "inside" })
-    //   .toFormat("jpeg", { quality: 80 })
-    //   .toBuffer();
-    //change it intp valid dataurl
-    // const fileUri = `data:image/jpeg;base64,${sharpedImage.toString(
-    //   "base64"
-    // )}`;
+   
+    // console.log(caption,image,author)
     const fileUrl = getDataUri(image);
     const cloudResult = await cloudinary.uploader.upload(fileUrl);
     const post = new Post({
       caption,
-      authorId: author,
+      author: author,
       image: cloudResult.secure_url,
     });
     await post.save();
 
     // insert that new post id into user post array;
-    const user = await UserActivation.findById(author);
+    const user = await User.findById(author);
     if (user) {
       user.posts.push(post._id);
       await user.save();
     }
     // populate the user details
-    await post.populate({ path: "author", select: "-password" });
+    await post.populate({ path:"author", select: "-password" });
+
     return res.status(200).json({
       message: `New post added ${user.username}`,
       success: true,
@@ -62,6 +57,7 @@ export const allPost = async (req, res) => {
           select: "username profilePicture ",
         },
       });
+
     return res.status(200).json({
       message: "successfull",
       success: true,
@@ -80,7 +76,7 @@ export const getUserPost = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate({ path: "author", select: "username profilePicture" })
       .populate({
-        path: "comments",
+        path: "Comments",
         sort: {
           createdAt: -1,
         },
@@ -89,6 +85,7 @@ export const getUserPost = async (req, res) => {
           select: "username profilePicture",
         },
       });
+      console.log(posts)
     return res.status(200).json({
       message: "successfully fetched data",
       success: true,
@@ -102,50 +99,95 @@ export const getUserPost = async (req, res) => {
 export const likePost = async (req, res) => {
   try {
     const userId = req.id;
-    const postId = req.params;
+    const postId = req.params.id;
+
+    // Find the post by ID
     const post = await Post.findById(postId);
     if (!post) {
-      return res.status(401).json({
-        message: "There is no such post..",
+      return res.status(404).json({
+        message: "There is no such post.",
         success: false,
       });
     }
-    //build logic of like
-    await Post.updateOne({ likes: { $push: userId } });
-    await Post.save();
-    //implement the socket io for notification
+
+    // Check if the user has already liked the post
+    if (post.likes.includes(userId)) {
+      return res.status(400).json({
+        message: "You have already liked this post.",
+        success: false,
+      });
+    }
+
+    // Add the user's ID to the list of likes
+    post.likes.push(userId);
+    await post.save();
+
+    // Implement socket.io for notifications (example)
+    // io.emit('notification', {
+    //   message: `${req.user.name} liked your post.`,
+    //   userId,
+    //   postId,
+    // });
 
     return res.status(200).json({ message: "Post liked", success: true });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while liking the post.",
+      success: false,
+    });
   }
 };
 
 export const dislikePost = async (req, res) => {
   try {
     const userId = req.id;
-    const postId = req.params;
+    const postId = req.params.id;
+
+    // Find the post by ID
     const post = await Post.findById(postId);
     if (!post) {
-      return res.status(401).json({
-        message: "There is no such post..",
+      return res.status(404).json({
+        message: "There is no such post.",
         success: false,
       });
     }
-    //build logic of dislike
-    await Post.updateOne({ likes: { $pull: userId } });
-    await Post.save();
-    //implement the socket io for notification
+
+    // Check if the user has already disliked the post (i.e., not in the likes array)
+    if (!post.likes.includes(userId)) {
+      return res.status(400).json({
+        message: "You have not liked this post yet.",
+        success: false,
+      });
+    }
+
+    // Remove the user's ID from the list of likes
+    post.likes.pull(userId);
+    await post.save();
+
+    // Implement socket.io for notifications (example)
+    // io.emit('notification', {
+    //   message: `${req.user.name} disliked your post.`,
+    //   userId,
+    //   postId,
+    // });
+
     return res.status(200).json({ message: "Post disliked", success: true });
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while disliking the post.",
+      success: false,
+    });
   }
 };
+
 export const addcomment = async (req, res) => {
   try {
+
     const postId = req.params.id;
     const commentUserId = req.id;
-    const caption = req.body;
+    const caption = req.body.text;
     const post = await Post.findById(postId);
     if (!caption) {
       return res.status(401).json({
@@ -164,12 +206,15 @@ export const addcomment = async (req, res) => {
       path: "author",
       select: "username profilePicture",
     });
-    post.Comments.push(comment._id);
+     await post.Comments.push(comment._id); 
+     await post.save()
+    // console.log(comment)
     return res.status(200).json({
       message: "successfully added comment",
       success: true,
       comment,
     });
+   
   } catch (error) {
     console.log(error);
   }
@@ -201,7 +246,7 @@ export const getCommentOfPost = async (req, res) => {
 // delete a post
 export const deletePost = async (req, res) => {
   try {
-    const postId = req.params;
+    const postId = req.params.id;
     const userId = req.id;
     const post = await Post.findById(postId);
     if (!post) {
