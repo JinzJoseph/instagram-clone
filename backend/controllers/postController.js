@@ -1,8 +1,9 @@
 import Post from "../models/postModel.js";
 import Comment from "../models/commentModel.js";
 import User from "../models/userModel.js";
-import getDataUri from "../middlewares/getDataurl.js"
+import getDataUri from "../middlewares/getDataurl.js";
 import cloudinary from "../middlewares/cloudinary.js";
+import { getReciverSocketId, io } from "../socket/soket.js";
 export const addNewPost = async (req, res) => {
   try {
     const { caption } = req.body;
@@ -14,7 +15,7 @@ export const addNewPost = async (req, res) => {
         success: false,
       });
     }
-   
+
     // console.log(caption,image,author)
     const fileUrl = getDataUri(image);
     const cloudResult = await cloudinary.uploader.upload(fileUrl);
@@ -32,7 +33,7 @@ export const addNewPost = async (req, res) => {
       await user.save();
     }
     // populate the user details
-    await post.populate({ path:"author", select: "-password" });
+    await post.populate({ path: "author", select: "-password" });
 
     return res.status(200).json({
       message: `New post added ${user.username}`,
@@ -85,7 +86,7 @@ export const getUserPost = async (req, res) => {
           select: "username profilePicture",
         },
       });
-      console.log(posts)
+    console.log(posts);
     return res.status(200).json({
       message: "successfully fetched data",
       success: true,
@@ -128,7 +129,19 @@ export const likePost = async (req, res) => {
     //   userId,
     //   postId,
     // });
-
+    const user = await User.findById(userId).select("username profilePicture");
+    const ownwerId = post.author.toString();
+    if (ownwerId !== userId) {
+      const notification={
+        type:'Like',
+        userId:userId,
+        userDetails:user,
+        postId,
+        message:"Your post was Liked"
+      }
+      const postOwerSocketId=getReciverSocketId(ownwerId);
+      io.to(postOwerSocketId).emit("notification",notification)
+    }
     return res.status(200).json({ message: "Post liked", success: true });
   } catch (error) {
     console.error(error);
@@ -171,7 +184,19 @@ export const dislikePost = async (req, res) => {
     //   userId,
     //   postId,
     // });
-
+    const user = await User.findById(userId).select("username profilePicture");
+    const ownwerId = post.author.toString();
+    if (ownwerId !== userId) {
+      const notification={
+        type:'Disike',
+        userId:userId,
+        userDetails:user,
+        postId,
+        message:"Your post was DisLiked"
+      }
+      const postOwerSocketId=getReciverSocketId(ownwerId);
+      io.to(postOwerSocketId).emit("notification",notification)
+    }
     return res.status(200).json({ message: "Post disliked", success: true });
   } catch (error) {
     console.error(error);
@@ -184,7 +209,6 @@ export const dislikePost = async (req, res) => {
 
 export const addcomment = async (req, res) => {
   try {
-
     const postId = req.params.id;
     const commentUserId = req.id;
     const caption = req.body.text;
@@ -206,15 +230,14 @@ export const addcomment = async (req, res) => {
       path: "author",
       select: "username profilePicture",
     });
-     await post.Comments.push(comment._id); 
-     await post.save()
+    await post.Comments.push(comment._id);
+    await post.save();
     // console.log(comment)
     return res.status(200).json({
       message: "successfully added comment",
       success: true,
       comment,
     });
-   
   } catch (error) {
     console.log(error);
   }

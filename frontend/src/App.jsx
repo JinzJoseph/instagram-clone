@@ -1,11 +1,18 @@
-import Home from "./components/Home"
+import Home from "./components/Home";
 import "./App.css";
 import MainLayout from "./components/MainLayout";
 import Profile from "./components/Profile";
 import Signup from "./components/Signup";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./components/Login";
-
+import EditProfile from "./components/EditProfile";
+import ChatPage from "./components/ChatPage";
+import { io } from "socket.io-client";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setSocket } from "./redux/socketSlice";
+import { setOnlineUsers } from "./redux/chatSlice";
+import { setnotification } from "./redux/notificationSlice";
 const browserRouter = createBrowserRouter([
   {
     path: "/",
@@ -16,26 +23,75 @@ const browserRouter = createBrowserRouter([
         element: <Home />,
       },
       {
-        path:"/profile/:id",
-        element:<Profile/>
-      }
+        path: "/profile/:id",
+        element: <Profile />,
+      },
+      {
+        path: "/editprofile",
+        element: <EditProfile />,
+      },
+      {
+        path: "/chat",
+        element: <ChatPage />,
+      },
     ],
   },
   {
-    path:"/login",
-    element:<Login/>
+    path: "/login",
+    element: <Login />,
   },
   {
-    path:"/signup",
-    element:<Signup/>
-
-  }
+    path: "/signup",
+    element: <Signup />,
+  },
 ]);
 
 function App() {
-  return <>
-   <RouterProvider router={browserRouter} />
-  </>;
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    let socketio;
+
+    if (user) {
+      socketio = io("http://localhost:3050", {
+        query: {
+          userId: user._id,
+        },
+        transports: ["websocket"],
+      });
+
+      dispatch(setSocket(socketio));
+
+      socketio.on("getOnlineUser", (onlineUsers) => {
+        dispatch(setOnlineUsers(onlineUsers));
+      });
+      socketio.on("notification", (notification) => {
+        console.log(notification);
+        dispatch(setnotification(notification));
+      });
+
+      return () => {
+        if (socketio) {
+          socketio.close();
+          dispatch(setSocket(null));
+        }
+      };
+    }
+
+    // Cleanup when there's no user (e.g., user logs out)
+    return () => {
+      if (socketio) {
+        socketio.close();
+        dispatch(setSocket(null));
+      }
+    };
+  }, [user, dispatch]);
+
+  return (
+    <>
+      <RouterProvider router={browserRouter} />
+    </>
+  );
 }
 
 export default App;

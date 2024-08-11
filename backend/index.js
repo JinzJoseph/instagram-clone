@@ -6,13 +6,14 @@ import connectDB from "./config/db.js";
 import userRoute from "./routes/userRoute.js";
 import postRoute from "./routes/postRoute.js"
 import MessageRoute from "./routes/messageRoute.js"
+import {app ,server,io} from  "./socket/soket.js"
 dotenv.config();
 const port = process.env.PORT || 3000;
 const corsOptions = {
   origin: process.env.URL,
   credentials: true,
 };
-const app = express();
+// const app = express();
 
 //middlewares
 
@@ -23,7 +24,7 @@ app.use(cookieParser());
 app.use("/api/v1/user",userRoute);
 app.use("/api/v1/post",postRoute);
 app.use("/api/v1/message",MessageRoute)
-app.listen(port, () => {
+server.listen(port, () => {
   try {
     console.log(`server started on port  ${port}`);
     connectDB();

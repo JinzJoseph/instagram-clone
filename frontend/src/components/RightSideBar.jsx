@@ -1,5 +1,5 @@
 import React from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom';
 import SuggestedUsers from '../components/SuggestedUser';
@@ -11,13 +11,13 @@ const RightSidebar = () => {
       <div className='flex items-center gap-2'>
         <Link to={`/profile/${user?._id}`}>
           <Avatar>
-            <AvatarImage className='w-7 h-7 rounded-full' src={user?.profilePicture ||   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} alt="post_image" />
+            <AvatarImage className='items-center' src={user?.profilePicture ||   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} alt="post_image" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
         </Link>
         <div>
           <h1 className='font-semibold text-sm'><Link to={`/profile/${user?._id}`}>{user?.username}</Link></h1>
-          <span className='text-gray-600 text-sm'>{user?.bio || 'Bio here...'}</span>
+          <span className='text-gray-600 text-sm sm:line-clamp-3'>{user?.bio || 'Bio here...'}</span>
         </div>
       </div>
       <SuggestedUsers/>

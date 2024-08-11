@@ -103,25 +103,42 @@ export const logout=async(req,res)=>{
        console.log(error) 
     }
 }
-export const getMyProfile=async(req,res)=>{
-    try {
-        const userId=req.params.id;
-        const user=await User.findById(userId).populate({path:'posts','createdAt':-1}).populate('bookmarks').select("-password")
-        if(!user){
-            return res.status(401).json({
-                message:"ther is no user",
-                success:false
-            })
-        }
-        return res.status(200).json({
-            message:"successfully fetched data",
-            success:true,
-            user
-        })
-    } catch (error) {
-        console.log(error)
-    }
-}
+export const getMyProfile = async (req, res) => {
+  try {
+      const userId = req.params.id;
+      const user = await User.findById(userId)
+          .populate({
+              path: 'posts',
+              options: { sort: { createdAt: -1 } }  // Correct way to sort posts by creation date in descending order
+          })
+          .populate('bookmarks')
+          .select("-password");
+
+      if (!user) {
+          return res.status(404).json({
+              message: "There is no user",
+              success: false
+          });
+      }
+      //console.log(user);
+      
+
+
+      return res.status(200).json({
+          message: "Successfully fetched data",
+          success: true,
+          user
+      });
+  } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+          message: "Internal server error",
+          success: false,
+          error: error.message
+      });
+  }
+};
+
 export const editprofile=async(req,res)=>{
   const userId=req.id;
   try {
@@ -145,7 +162,8 @@ export const editprofile=async(req,res)=>{
     await user.save();
     return res.status(200).json({
       message:"User Edited successfully..",
-      success:true
+      success:true,
+      user
     })
   } catch (error) {
     console.log(error)
