@@ -1,4 +1,4 @@
-import { setAuthUser } from "@/redux/authSlice";
+import { setAuthUser, setsuggestedUser } from "@/redux/authSlice";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import axios from "axios";
 import {
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import CreatePost from "./CreatePost";
 import { setPost, setselectedPost } from "@/redux/postSlice";
+import SuggestedUser from "./SuggestedUser";
 
 const LeftSidebar = () => {
   const { user } = useSelector((state) => state.auth);
@@ -84,6 +85,7 @@ const LeftSidebar = () => {
         dispatch(setAuthUser(null));
         dispatch(setPost(null));
         dispatch(setselectedPost(null))
+        dispatch(setsuggestedUser(null))
         toast.success(res.data.message);
         navigate("/login");
       }

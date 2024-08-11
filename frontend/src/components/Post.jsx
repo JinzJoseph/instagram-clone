@@ -19,7 +19,7 @@ const Post = ({ item }) => {
   const dispatch = useDispatch();
   const { post } = useSelector((state) => state.posts);
   const { user } = useSelector((state) => state.auth);
-  const [like, setLike] =   useState(item?.likes?.includes(user?._id) || false);
+  const [like, setLike] = useState(item?.likes?.includes(user?._id) || false);
   const [comment, setcomment] = useState(item?.Comments);
   const [postLike, setpostlike] = useState(item?.likes?.length);
   const deletePostHandler = async () => {
@@ -38,7 +38,6 @@ const Post = ({ item }) => {
       console.log(error);
     }
   };
-
 
   const likeAndDislike = async () => {
     try {
@@ -186,10 +185,10 @@ const Post = ({ item }) => {
           )}
 
           <FaRegMessage
-           onClick={() => {
-            setOpen(true);
-            dispatch(setselectedPost(item))
-          }}
+            onClick={() => {
+              setOpen(true);
+              dispatch(setselectedPost(item));
+            }}
             size={"24px"}
             className="cursor-pointer hover:text-gray-600"
           />
@@ -213,11 +212,12 @@ const Post = ({ item }) => {
       <span
         onClick={() => {
           setOpen(true);
-          dispatch(setselectedPost(item))
+          dispatch(setselectedPost(item));
         }}
         className="cursor-pointer text-gray-300"
       >
-        view all {item.Comments.length} comment
+        {item.Comments.length > 0 &&
+          `view all ${item.Comments.length} comments`}
       </span>
       <CommentDialog open={open} setopen={setOpen} />
       <div className="flex  items-center justify-between my-2">
