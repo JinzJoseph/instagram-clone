@@ -1,23 +1,23 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuthUser } from "@/redux/authSlice";
 
 const Login = () => {
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const [input, setInput] = useState({
-  
     email: "",
     password: "",
   });
   const changeEventhandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
+  const { user } = useSelector((state) => state.auth);
   const [loading, setloading] = useState(false);
   //const url = import.meta.env.VITE_URL;
   //console.log(url)
@@ -25,7 +25,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log(input)
+      console.log(input);
 
       setloading(true);
       const res = await axios.post("/api/v1/user/login", input, {
@@ -36,11 +36,10 @@ const Login = () => {
       });
       setloading(false);
       if (res.data.success) {
-        dispatch(setAuthUser(res.data.user))
+        dispatch(setAuthUser(res.data.user));
         navigate("/");
         toast.success(res.data.message);
         setInput({
-        
           email: "",
           password: "",
         });
@@ -49,6 +48,11 @@ const Login = () => {
       console.log(error);
     }
   };
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, []);
   return (
     <div className="flex items-center h-screen w-screen justify-center">
       <form
@@ -56,12 +60,12 @@ const Login = () => {
         className="shadow-lg flex flex-col gap-5 p-8"
       >
         <div className="my-4">
-          <h1 className="text-center font-bold text-2xl pb-3">LOGO</h1>
+        <h1 className="my-8 mx-19 italic font-bold text-xl">Instagram</h1>
           <p className="text-sm text-center">
             Signup to see photos & videos from your friends
           </p>
         </div>
-       
+
         <div>
           <span>Email</span>
           <Input

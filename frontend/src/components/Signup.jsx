@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -15,6 +16,7 @@ const Signup = () => {
   const changeEventhandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
+  const { user } = useSelector((state) => state.auth);
   const [loading, setloading] = useState(false);
   //const url = import.meta.env.VITE_URL;
   //console.log(url)
@@ -45,6 +47,11 @@ const Signup = () => {
       console.log(error);
     }
   };
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, []);
   return (
     <div className="flex items-center h-screen w-screen justify-center">
       <form
@@ -52,7 +59,7 @@ const Signup = () => {
         className="shadow-lg flex flex-col gap-5 p-8"
       >
         <div className="my-4">
-          <h1 className="text-center font-bold text-2xl ">LOGO</h1>
+        <h1 className="my-8 mx-19 italic font-bold text-xl">Instagram</h1>
           <p className="text-sm text-center">
             Signup to see photos & videos from your friends
           </p>

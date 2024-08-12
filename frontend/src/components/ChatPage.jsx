@@ -7,11 +7,15 @@ import { MessageCircle } from "lucide-react";
 import Message from "./Message";
 import axios from "axios";
 import { setMessage } from "@/redux/chatSlice";
+import { Navigate } from "react-router-dom";
 
 const ChatPage = () => {
   const { user, suggesteduser, selectedUser } = useSelector(
     (state) => state.auth
   );
+  if (!user) {
+    Navigate("/login");
+  }
 
   const dispatch = useDispatch();
   const { onlineuser, message } = useSelector((state) => state.chat);
@@ -59,15 +63,17 @@ const ChatPage = () => {
                 onClick={() => {
                   dispatch(setSelecteduser(user));
                   // dispatch(setRefresh())
-                 
                 }}
               >
                 <Avatar>
-                  <AvatarImage src={user?.profilePicture} alt={user.username} />
-                  <AvatarFallback>{user.username[0]}</AvatarFallback>
+                  <AvatarImage
+                    src={user?.profilePicture}
+                    alt={user?.username}
+                  />
+                  <AvatarFallback>{user?.username[0]}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="font-medium">{user.username}</span>
+                  <span className="font-medium">{user?.username}</span>
                   <span
                     className={`text-xs font-bold ${
                       isOnline ? "text-green-400" : "text-red-600"

@@ -5,37 +5,45 @@ import { Link } from "react-router-dom";
 
 const SuggestedUser = () => {
   const { suggesteduser } = useSelector((state) => state.auth);
+
   return (
     <div className="my-10 w-full">
-      <div className="flex items-center justify-between  my-5">
-        <h1 className="font-semibold text-gray-600">Suggested Users</h1>
-        <span className="font-medium cursor-pointer">See all</span>
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-lg font-semibold text-gray-700">Suggested Users</h1>
+        <span className="text-sm font-medium text-blue-500 cursor-pointer hover:underline">See all</span>
       </div>
-      {suggesteduser?.map((user, index) => {
-        return (
-          <div key={index} className="flex items-center justify-between my-5">
-            <div className="flex items-center gap-2">
+
+      {suggesteduser?.map((user, index) => (
+        <div key={index} className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-3">
+            <Link to={`/profile/${user?._id}`}>
+              <Avatar className="">
+                <AvatarImage
+                  src={user?.profilePicture}
+                  alt="user_profile_picture"
+                  className="rounded-full w-10 h-10"
+                />
+                <AvatarFallback className="bg-gray-300 text-gray-700">
+                  {user?.username[0]}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+            <div className="flex flex-col">
               <Link to={`/profile/${user?._id}`}>
-                <Avatar>
-                  <AvatarImage src={user?.profilePicture} alt="post_image" />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
-              </Link>
-              <div>
-                <h1 className="font-semibold text-sm">
-                  <Link to={`/profile/${user?._id}`}>{user?.username}</Link>
+                <h1 className="font-semibold text-sm text-gray-800 hover:underline">
+                  {user?.username}
                 </h1>
-                <span className="text-gray-600 text-sm">
-                  {user?.bio || "Bio here..."}
-                </span>
-              </div>
+              </Link>
+              <span className="text-gray-600 text-xs">
+                {user?.bio || "Bio here..."}
+              </span>
             </div>
-            <span className="text-white bg-blue-500 rounded-full px-5 py-1 text-xs font-bold cursor-pointer hover:text-[#0b161d]">
-              Follow
-            </span>
           </div>
-        );
-      })}
+          <button className="text-xs font-bold text-white bg-blue-500 rounded-full px-4 py-1 hover:bg-blue-600 transition duration-200">
+            Follow
+          </button>
+        </div>
+      ))}
     </div>
   );
 };

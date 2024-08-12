@@ -1,8 +1,9 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { CiBookmark } from "react-icons/ci";
 import { CiHeart } from "react-icons/ci";
 import { FaHeart, FaRegMessage } from "react-icons/fa6";
+import { FaBookmark } from "react-icons/fa";
 import { MoreHorizontal } from "lucide-react";
 import React, { useState } from "react";
 import { Button } from "./ui/button";
@@ -79,7 +80,7 @@ const Post = ({ item }) => {
     try {
       e.preventDefault();
       const res = await axios.post(
-        `/api/v1/post/addcomment/${item._id}`,
+        `/api/v1/post/addcomment/${item?._id}`,
         { text },
         {
           headers: {
@@ -115,7 +116,25 @@ const Post = ({ item }) => {
       console.log(error);
     }
   };
-
+  const bookMarHandler = async () => {
+    try {
+      const res = await axios.post(
+        `/api/v1/post/bookmarked/${item._id}`,
+        {
+          headers: {
+            "content-type": "application/json",
+          },
+        },
+        { withCredentials: true }
+      );
+      console.log(res);
+      if (res.data.success) {
+        toast.message(res.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <div className="my-8 w-full  max-w-md   mx-auto">
       <div className="flex items-center justify-between">
@@ -131,12 +150,15 @@ const Post = ({ item }) => {
             <MoreHorizontal asChild children=" cursor-pointer" />
           </DialogTrigger>
           <DialogContent className="flex flex-col items-center text-sm justify-center">
-            <Button
-              variant="gost"
-              className="cursor-pointer w-fit text-[#ED4956] font-bold"
-            >
-              unfollow
-            </Button>
+            {item?.author?._id !== user?._id && (
+              <Button
+                variant="ghost"
+                className="cursor-pointer w-fit text-[#ED4956] font-bold"
+              >
+                Unfollow
+              </Button>
+            )}
+          
             <Button
               variant="gost"
               className="cursor-pointer w-fit text-[#8249ed] font-bold"
@@ -198,7 +220,23 @@ const Post = ({ item }) => {
           />
         </div>
         <div>
+          {/* {
+            user?.bookmarks?.includes(item?._id) ?(
+              <FaBookmark
+              onClick={bookMarHandler}
+              size={"26px"}
+              className="cursor-pointer hover:text-gray-600"
+            />
+            ):(
+              <CiBookmark
+              onClick={bookMarHandler}
+              size={"26px"}
+              className="cursor-pointer hover:text-gray-600"
+            />
+            )
+          } */}
           <CiBookmark
+            onClick={bookMarHandler}
             size={"26px"}
             className="cursor-pointer hover:text-gray-600"
           />

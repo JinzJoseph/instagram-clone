@@ -11,5 +11,5 @@ router.put("/dislike/:id",isAuthenticated,dislikePost);
 router.post("/addcomment/:id",isAuthenticated,addcomment);
 router.get("/getCommentOfPost/:id",isAuthenticated,getCommentOfPost);
 router.delete("/deletePost/:id",isAuthenticated,deletePost);
-router.put("/bookmarked/:id",isAuthenticated,bookmarked)
+router.post("/bookmarked/:id",isAuthenticated,bookmarked)
 export default router

@@ -13,26 +13,48 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSocket } from "./redux/socketSlice";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { setnotification } from "./redux/notificationSlice";
+import ProtectedRoute from "./components/protectedRoute";
 const browserRouter = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+      <ProtectedRoute>
+        {" "}
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/profile/:id",
-        element: <Profile />,
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/editprofile",
-        element: <EditProfile />,
+        element: (
+          <ProtectedRoute>
+            <EditProfile />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/chat",
-        element: <ChatPage />,
+        element: (
+          <ProtectedRoute>
+            <ChatPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -66,7 +88,7 @@ function App() {
         dispatch(setOnlineUsers(onlineUsers));
       });
       socketio.on("notification", (notification) => {
-        console.log(notification);
+        console.log("notification"+notification);
         dispatch(setnotification(notification));
       });
 
@@ -74,9 +96,16 @@ function App() {
         if (socketio) {
           socketio.close();
           dispatch(setSocket(null));
+          // dispatch(setnotification([]));
+          //
         }
       };
-    }
+    } 
+    //else if (socketio) {
+    //   socketio.close();
+    //   dispatch(setSocket(null));
+    //   dispatch(setnotification([]));
+    // }
 
     // Cleanup when there's no user (e.g., user logs out)
     return () => {

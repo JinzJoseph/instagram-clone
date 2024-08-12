@@ -1,7 +1,8 @@
-import { setAuthUser, setsuggestedUser } from "@/redux/authSlice";
+import { setAuthUser, setsuggestedUser, setUserProfile } from "@/redux/authSlice";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import axios from "axios";
 import {
+  Axis3D,
   Heart,
   Home,
   LogOut,
@@ -24,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "./ui/button";
+import { setnotification } from "@/redux/notificationSlice";
 const LeftSidebar = () => {
   const { user } = useSelector((state) => state.auth);
   console.log(user);
@@ -93,13 +95,17 @@ const LeftSidebar = () => {
   const handleLogout = async () => {
     try {
       const res = await axios.get("/api/v1/user/logout");
+      console.log(res)
       if (res.data.success) {
         dispatch(setAuthUser(null));
-        dispatch(setPost(null));
+        dispatch(setPost([]));
         dispatch(setselectedPost(null));
-        dispatch(setsuggestedUser(null));
-        dispatch(setOnlineUsers(null));
-        dispatch(setMessage(null));
+        //dispatch(setnotification([]))
+        // dispatch(setUserProfile(null))
+        // dispatch(setsuggestedUser(null));
+        // dispatch(setOnlineUsers(null));
+        // dispatch(setMessage(null));
+      
         toast.success(res.data.message);
         navigate("/login");
       }
@@ -107,10 +113,11 @@ const LeftSidebar = () => {
       console.log(error);
     }
   };
+ 
   return (
     <div className="fixed top-0 z-10  ml-10 border-r border-gray-300 w-[15%] h-screen ">
-      <div className="flex flex-col ml-10">
-        <h1 className="my-8 pl-3 font-bold text-xl">Logo</h1>
+      <div className="flex flex-col ml-5">
+        <h1 className="my-8 mx-19 italic font-bold text-xl">Instagram</h1>
       </div>
 
       <div>

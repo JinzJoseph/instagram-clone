@@ -26,6 +26,7 @@ const dispatch=useDispatch()
     }
   };
 const {post}=useSelector((state)=>state.posts)
+const {user}=useSelector((state)=>state.auth)
   const createPostHandler = async () => {
     const data = new FormData();
     data.append("image", file);
@@ -65,7 +66,7 @@ const {post}=useSelector((state)=>state.posts)
             <AvatarImage
               className="rounded-full"
               src={
-                "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                user.profilePicture
               }
               alt="User Avatar"
             />

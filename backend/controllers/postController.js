@@ -132,15 +132,15 @@ export const likePost = async (req, res) => {
     const user = await User.findById(userId).select("username profilePicture");
     const ownwerId = post.author.toString();
     if (ownwerId !== userId) {
-      const notification={
-        type:'Like',
-        userId:userId,
-        userDetails:user,
+      const notification = {
+        type: "Like",
+        userId: userId,
+        userDetails: user,
         postId,
-        message:"Your post was Liked"
-      }
-      const postOwerSocketId=getReciverSocketId(ownwerId);
-      io.to(postOwerSocketId).emit("notification",notification)
+        message: "Your post was Liked",
+      };
+      const postOwerSocketId = getReciverSocketId(ownwerId);
+      io.to(postOwerSocketId).emit("notification", notification);
     }
     return res.status(200).json({ message: "Post liked", success: true });
   } catch (error) {
@@ -187,15 +187,15 @@ export const dislikePost = async (req, res) => {
     const user = await User.findById(userId).select("username profilePicture");
     const ownwerId = post.author.toString();
     if (ownwerId !== userId) {
-      const notification={
-        type:'Disike',
-        userId:userId,
-        userDetails:user,
+      const notification = {
+        type: "Disike",
+        userId: userId,
+        userDetails: user,
         postId,
-        message:"Your post was DisLiked"
-      }
-      const postOwerSocketId=getReciverSocketId(ownwerId);
-      io.to(postOwerSocketId).emit("notification",notification)
+        message: "Your post was DisLiked",
+      };
+      const postOwerSocketId = getReciverSocketId(ownwerId);
+      io.to(postOwerSocketId).emit("notification", notification);
     }
     return res.status(200).json({ message: "Post disliked", success: true });
   } catch (error) {
@@ -304,34 +304,43 @@ export const deletePost = async (req, res) => {
 
 export const bookmarked = async (req, res) => {
   try {
-    const postId = req.params;
+    const postId = req.params.id;
+
     const authorId = req.id;
+
     const post = await Post.findById(postId);
     const user = await User.findById(authorId);
+
     if (!post) {
-      return res.status(401).json({
-        message: "There is no such Post..",
+      return res.status(404).json({
+        message: "Post not found.",
         success: false,
       });
     }
+
     if (user.bookmarks.includes(postId)) {
-      //remove that that post
-      await User.updateOne({ $pull: { postId } });
-      await User.save();
+      // Remove the post from bookmarks
+      await User.updateOne({ _id: authorId }, { $pull: { bookmarks: postId } });
+
       return res.status(200).json({
-        message: "Removed that post from bookmark",
+        message: "Post removed from bookmarks.",
         success: true,
+        
       });
     } else {
-      // include that post in bookmark
-      await User.updateOne({ $push: { postId } });
-      await User.save();
+      // Add the post to bookmarks
+      await User.updateOne({ _id: authorId }, { $push: { bookmarks: postId } });
+
       return res.status(200).json({
-        message: "Added that post from bookmark",
+        message: "Post added to bookmarks.",
         success: true,
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while updating bookmarks.",
+      success: false,
+    });
   }
 };
